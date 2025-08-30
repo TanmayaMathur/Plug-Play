@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Agent - AI-Powered Voice Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-header h5 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-check {
+            margin-bottom: 10px;
+        }
+
+        .form-check-input {
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary { background: #007bff; }
+        .btn-success { background: #28a745; }
+        .btn-info { background: #17a2b8; }
+        .btn-danger { background: #dc3545; }
+        .btn-sm { padding: 8px 16px; font-size: 0.9rem; }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group .form-control {
+            flex: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .mb-3 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 1rem; }
+
+        .text-muted { color: #6c757d; }
+        .text-success { color: #28a745; }
+        .text-info { color: #17a2b8; }
+        .text-danger { color: #dc3545; }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .border { border: 1px solid #dee2e6; }
+        .bg-light { background-color: #f8f9fa; }
+        .p-2 { padding: 0.5rem; }
+
+        .voice-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .record-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .record-btn:hover { transform: scale(1.1); }
+        .record-btn.recording { background: linear-gradient(135deg, #ff4757 0%, #c44569 100%); }
+        .record-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .conversation-area { grid-column: 1 / -1; }
+
+        .conversation-item {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .conversation-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .user-input, .ai-response {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { grid-template-columns: 1fr; gap: 20px; }
+            .conversation-content { grid-template-columns: 1fr; gap: 15px; }
+            .header h1 { font-size: 2rem; }
+            .container { padding: 15px; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-microphone-alt"></i> Voice Agent</h1>
+            <p>AI-Powered Voice Assistant with Natural Speech</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Configuration Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>🔧 Agent Configuration</h5>
+                </div>
+                <div class="card-body">
+                                         <!-- Step 1: LLM Choice -->
+                     <div class="mb-3">
+                         <label class="form-label">Step 1: Choose your LLM option</label>
+                         <div class="form-check">
+                             <input class="form-check-input" type="radio" name="llmChoice" id="customLLM" value="custom">
+                             <label class="form-check-label" for="customLLM">
+                                 🔗 Use your own pretrained LLM
+                             </label>
+                         </div>
+                         <div class="form-check">
+                             <input class="form-check-input" type="radio" name="llmChoice" id="inbuiltLLM" value="inbuilt" checked>
+                             <label class="form-check-label" for="inbuiltLLM">
+                                 🤖 Use our inbuilt LLM (OpenRouter) - Recommended
+                             </label>
+                         </div>
+                     </div>
+
+                     <!-- Custom LLM Configuration (only for custom LLM) -->
+                     <div id="customLLMSection" class="mb-3" style="display: none;">
+                         <label class="form-label">Step 2: Configure your Custom LLM</label>
+                         <div class="mb-3">
+                             <label class="form-label">API Endpoint URL</label>
+                             <input type="url" class="form-control" id="customAPIUrl" placeholder="https://your-llm-api.com/v1/chat/completions">
+                             <small class="form-text text-muted">Enter your LLM API endpoint URL</small>
+                         </div>
+                                                   <div class="mb-3">
+                              <label class="form-label">API Key</label>
+                              <input type="password" class="form-control" id="customAPIKey" placeholder="sk-your-api-key-here">
+                              <small class="form-text text-muted">Enter your LLM API key</small>
+                          </div>
+                          <div class="mb-3">
+                              <label class="form-label">Model Name</label>
+                              <input type="text" class="form-control" id="customModelName" placeholder="llama3-8b-8192, gpt-4, claude-3, etc." value="llama3-8b-8192">
+                              <small class="form-text text-muted">Enter the model name your API supports (e.g., llama3-8b-8192 for Groq, gpt-4 for OpenAI)</small>
+                          </div>
+                     </div>
+
+                    <!-- Step 2: Context Setup (for both LLM types) -->
+                    <div id="contextSection" class="mb-3">
+                        <label class="form-label">Step 2: Set your work context/domain</label>
+                        <input type="text" class="form-control" id="contextInput" placeholder="Examples: customer support, healthcare, education, finance" value="general assistant">
+                        <small class="form-text text-muted">This helps the AI provide more relevant responses</small>
+                    </div>
+
+                    <!-- Step 3: PDF Context Upload (for both LLM types) -->
+                    <div id="pdfUploadSection" class="mb-3">
+                        <label class="form-label">Step 3: Upload Context Files (Optional but Recommended)</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="contextFile" accept=".pdf,.docx,.txt">
+                            <button class="btn btn-primary" type="button" id="uploadBtn">📄 Upload Context</button>
+                        </div>
+                        <small class="form-text text-muted">Supported: PDF, DOCX, TXT files. This will help the AI provide accurate, context-aware answers.</small>
+                        
+                        <!-- Context Status -->
+                        <div id="contextStatus" class="mt-2"></div>
+                        
+                        <!-- Context Management -->
+                        <div id="contextManagement" class="mt-3" style="display: none;">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-info btn-sm" id="viewContextBtn">📋 View Context</button>
+                                <button class="btn btn-danger btn-sm" id="clearContextBtn">🗑️ Clear Context</button>
+                            </div>
+                            <div id="contextInfo" class="mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Setup Button -->
+                    <button class="btn btn-success" id="setupBtn">🚀 Setup Voice Agent</button>
+                    
+                    <!-- Status Display -->
+                    <div id="setupStatus" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Voice Control Card -->
+            <div class="card">
+                <h2><i class="fas fa-microphone"></i> Voice Control</h2>
+                
+                <div class="voice-controls">
+                    <button class="record-btn" id="recordBtn" disabled>
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <p style="margin-top: 15px; color: #718096;">Click to start recording</p>
+                    
+                                         <!-- Recording options -->
+                     <div class="recording-options" style="margin-top: 15px;">
+                         <label style="display: block; margin-bottom: 8px;">
+                             <input type="checkbox" id="autoStop" checked> Auto-stop on silence
+                         </label>
+                         <label style="display: block; margin-bottom: 8px;">
+                             <input type="checkbox" id="manualMode"> Manual recording mode
+                         </label>
+                         <label style="display: block; margin-bottom: 8px;">
+                             <input type="checkbox" id="enableSpeech" checked> 🔊 Enable AI Speech Reply
+                         </label>
+                     </div>
+                     
+                     <!-- Speech Control -->
+                     <div class="speech-controls" style="margin-top: 15px;">
+                         <button class="btn btn-danger btn-sm" id="stopSpeechBtn" style="display: none;">
+                             <i class="fas fa-stop"></i> Stop AI Speech
+                         </button>
+                         <small class="form-text text-muted">Click to stop ongoing AI speech</small>
+                     </div>
+                    
+                    <!-- Recording status -->
+                    <div id="recordingStatus" class="recording-status" style="margin-top: 15px; font-size: 0.9rem;"></div>
+                    
+                    <!-- Microphone permission button -->
+                    <button class="btn btn-secondary" id="permissionBtn" style="margin-top: 15px; display: none;">
+                        <i class="fas fa-microphone-slash"></i> Grant Microphone Permission
+                    </button>
+                    
+                    <p id="microphoneStatus" style="margin-top: 10px; font-size: 0.9rem; color: #718096;"></p>
+                </div>
+
+                <div class="loading" id="loading" style="display: none; text-align: center; padding: 20px;">
+                    <div class="spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                    <p>Processing your voice...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation History -->
+        <div class="card conversation-area">
+            <h2><i class="fas fa-comments"></i> Conversation History</h2>
+            <div id="conversationList">
+                <p style="text-align: center; color: #718096; padding: 40px;">
+                    <i class="fas fa-comment-slash" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    No conversations yet. Start by configuring your agent and recording your voice!
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 Voice Agent Framework. Built with ❤️ for AI Innovation.</p>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isAgentSetup = false;
+        let currentContext = "";
+        let contextFiles = [];
+
+                 // Handle LLM choice changes
+         document.querySelectorAll('input[name="llmChoice"]').forEach(radio => {
+             radio.addEventListener('change', function() {
+                 const isInbuilt = this.value === 'inbuilt';
+                 const isCustom = this.value === 'custom';
+                 
+                 // Show/hide custom LLM section
+                 document.getElementById('customLLMSection').style.display = isCustom ? 'block' : 'none';
+                 
+                 // Show context sections for both LLM types
+                 document.getElementById('contextSection').style.display = 'block';
+                 document.getElementById('pdfUploadSection').style.display = 'block';
+                 
+                 // Don't clear context when switching LLM types
+                 // Context can be used by both inbuilt and custom LLM
+             });
+         });
+
+        // Handle file selection
+        document.getElementById('contextFile').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('contextStatus').innerHTML = `<span class="text-info">📄 Selected: ${file.name}</span>`;
+            }
+        });
+
+        // Upload context file
+        document.getElementById('uploadBtn').addEventListener('click', function() {
+            const file = document.getElementById('contextFile').files[0];
+            if (!file) {
+                showMessage('Please select a file first', 'error');
+                return;
+            }
+            uploadContextFile(file);
+        });
+
+        // View context info
+        document.getElementById('viewContextBtn').addEventListener('click', function() {
+            showContextInfo();
+        });
+
+        // Clear context
+        document.getElementById('clearContextBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all context?')) {
+                clearContext();
+            }
+        });
+
+        // Setup agent
+        document.getElementById('setupBtn').addEventListener('click', function() {
+            setupAgent();
+        });
+
+        // Microphone permission
+        document.getElementById('permissionBtn').addEventListener('click', function() {
+            requestMicrophonePermission();
+        });
+
+                 // Record button
+         document.getElementById('recordBtn').addEventListener('click', function() {
+             toggleRecording();
+         });
+         
+         // Stop speech button
+         document.getElementById('stopSpeechBtn').addEventListener('click', function() {
+             stopAISpeech();
+         });
+
+        function uploadContextFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/upload-context', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentContext = data.context;
+                    contextFiles = data.files;
+                    
+                    document.getElementById('contextStatus').innerHTML = `
+                        <span class="text-success">✅ Context updated with ${data.chars} characters from ${file.name}</span>
+                    `;
+                    document.getElementById('contextManagement').style.display = 'block';
+                    
+                    showMessage(`Context uploaded successfully! ${data.chars} characters loaded.`, 'success');
+                } else {
+                    showMessage(`Failed to upload context: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(`Upload error: ${error.message}`, 'error');
+            });
+        }
+
+        function showContextInfo() {
+            // Fetch current context info from backend instead of using local variables
+            fetch('/api/context-info')
+            .then(response => response.json())
+            .then(data => {
+                if (data.has_context) {
+                    let info = `<div class="alert alert-info">
+                        <strong>📄 Context Loaded:</strong> ${data.context_length} characters<br>
+                        <strong>📁 Files Uploaded:</strong> ${data.files_uploaded.length}<br><br>`;
+                    
+                    data.files_uploaded.forEach((file, index) => {
+                        info += `${index + 1}. ${file.filename} (${file.size} chars) - ${file.uploaded}<br>`;
+                    });
+                    
+                    info += `<br><strong>📖 Context Preview (first 300 chars):</strong><br>
+                        <div class="border p-2 bg-light">${data.context_preview.substring(0, 300)}${data.context_preview.length > 300 ? '...' : ''}</div>
+                    </div>`;
+                    
+                    document.getElementById('contextInfo').innerHTML = info;
+                } else {
+                    document.getElementById('contextInfo').innerHTML = '<span class="text-muted">No context files uploaded yet</span>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('contextInfo').innerHTML = `<span class="text-danger">Error loading context: ${error.message}</span>`;
+            });
+        }
+
+        function clearContext() {
+            fetch('/api/clear-context')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentContext = "";
+                    contextFiles = [];
+                    document.getElementById('contextStatus').innerHTML = '';
+                    document.getElementById('contextManagement').style.display = 'none';
+                    document.getElementById('contextFile').value = '';
+                    document.getElementById('uploadBtn').disabled = true;
+                    showMessage('All context cleared successfully!', 'success');
+                }
+            })
+            .catch(error => {
+                showMessage(`Error clearing context: ${error.message}`, 'error');
+            });
+        }
+
+                 function setupAgent() {
+             const llmType = document.querySelector('input[name="llmChoice"]:checked').value;
+             const context = document.getElementById('contextInput').value || 'general assistant';
+             
+             let setupData = {
+                 llm_type: llmType,
+                 context: context
+             };
+             
+                           // Add custom LLM API details if custom LLM is selected
+              if (llmType === 'custom') {
+                  const apiUrl = document.getElementById('customAPIUrl').value.trim();
+                  const apiKey = document.getElementById('customAPIKey').value.trim();
+                  const modelName = document.getElementById('customModelName').value.trim();
+                  
+                  if (!apiUrl || !apiKey || !modelName) {
+                      showMessage('Please provide API URL, API Key, and Model Name for custom LLM', 'error');
+                      return;
+                  }
+                  
+                  setupData.api_url = apiUrl;
+                  setupData.api_key = apiKey;
+                  setupData.model_name = modelName;
+              }
+
+            // Show setup status
+            document.getElementById('setupStatus').innerHTML = '<span class="text-info">🔧 Setting up voice agent...</span>';
+
+            fetch('/api/setup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(setupData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    isAgentSetup = true;
+                                         document.getElementById('setupStatus').innerHTML = `
+                         <span class="text-success">✅ Voice Agent ready!</span><br>
+                         <small>LLM: ${llmType === 'inbuilt' ? 'OpenRouter' : 'Custom'}, Context: ${context}</small>
+                     `;
+                     
+                     if (llmType === 'custom') {
+                         const apiUrl = document.getElementById('customAPIUrl').value.trim();
+                         document.getElementById('setupStatus').innerHTML += `<br><small class="text-info">🔗 Custom LLM: ${apiUrl.substring(0, 30)}...</small>`;
+                     } else if (llmType === 'inbuilt' && currentContext) {
+                         document.getElementById('setupStatus').innerHTML += `<br><small class="text-info">📄 PDF Context loaded: ${currentContext.length} characters</small>`;
+                     }
+                    
+                    // Enable recording button
+                    document.getElementById('recordBtn').disabled = false;
+                    
+                    showMessage('Voice Agent configured successfully!', 'success');
+                } else {
+                    document.getElementById('setupStatus').innerHTML = `<span class="text-danger">❌ Setup failed: ${data.error}</span>`;
+                    showMessage(`Setup failed: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                document.getElementById('setupStatus').innerHTML = `<span class="text-danger">❌ Setup error: ${error.message}</span>`;
+                showMessage(`Setup error: ${error.message}`, 'error');
+            });
+        }
+
+        function showMessage(message, type) {
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+
+        // Toggle recording
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+                 // Start recording
+         async function startRecording() {
+             try {
+                 const stream = await navigator.mediaDevices.getUserMedia({ 
+                     audio: {
+                         echoCancellation: true,
+                         noiseSuppression: true,
+                         autoGainControl: true,
+                         sampleRate: 16000,
+                         channelCount: 1
+                     } 
+                 });
+                 
+                 mediaRecorder = new MediaRecorder(stream, {
+                     mimeType: 'audio/webm;codecs=opus'
+                 });
+                 audioChunks = [];
+ 
+                 mediaRecorder.ondataavailable = (event) => {
+                     audioChunks.push(event.data);
+                 };
+ 
+                 mediaRecorder.onstop = async () => {
+                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                     await processAudio(audioBlob);
+                 };
+ 
+                 // Start recording
+                 mediaRecorder.start(100);
+                 isRecording = true;
+                 document.getElementById('recordBtn').classList.add('recording');
+                 document.getElementById('recordBtn').innerHTML = '<i class="fas fa-stop"></i>';
+                 document.getElementById('recordingStatus').innerHTML = '<span style="color: #27ae60;">Recording...</span>';
+                 
+                 // Start auto-stop on silence detection if enabled
+                 if (document.getElementById('autoStop').checked && !document.getElementById('manualMode').checked) {
+                     startSilenceDetection(stream);
+                 }
+                 
+             } catch (error) {
+                 showMessage('Failed to start recording: ' + error.message, 'error');
+             }
+         }
+
+                 // Stop recording
+         function stopRecording() {
+             if (mediaRecorder && isRecording) {
+                 mediaRecorder.stop();
+                 mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                 isRecording = false;
+                 document.getElementById('recordBtn').classList.remove('recording');
+                 document.getElementById('recordBtn').innerHTML = '<i class="fas fa-microphone"></i>';
+                 document.getElementById('recordingStatus').innerHTML = '<span style="color: #718096;">Stopped recording</span>';
+                 
+                 // Stop silence detection
+                 if (window.silenceDetectionInterval) {
+                     clearInterval(window.silenceDetectionInterval);
+                     window.silenceDetectionInterval = null;
+                 }
+             }
+         }
+         
+         // Silence detection for auto-stop
+         function startSilenceDetection(stream) {
+             const audioContext = new AudioContext();
+             const analyser = audioContext.createAnalyser();
+             const microphone = audioContext.createMediaStreamSource(stream);
+             
+             microphone.connect(analyser);
+             analyser.fftSize = 256;
+             const bufferLength = analyser.frequencyBinCount;
+             const dataArray = new Uint8Array(bufferLength);
+             
+             let silenceStartTime = null;
+             const silenceThreshold = 0.1; // Adjust this value for sensitivity
+             const silenceDuration = 2000; // Stop after 2 seconds of silence
+             
+             window.silenceDetectionInterval = setInterval(() => {
+                 analyser.getByteFrequencyData(dataArray);
+                 
+                 // Calculate average volume
+                 let sum = 0;
+                 for (let i = 0; i < bufferLength; i++) {
+                     sum += dataArray[i];
+                 }
+                 const average = sum / bufferLength;
+                 const normalizedVolume = average / 255;
+                 
+                 // Update recording status with volume level
+                 const volumeBar = Math.round(normalizedVolume * 20);
+                 const volumeIndicator = '█'.repeat(volumeBar) + '░'.repeat(20 - volumeBar);
+                 document.getElementById('recordingStatus').innerHTML = `
+                     <span style="color: #27ae60;">Recording... Volume: ${volumeIndicator}</span>
+                 `;
+                 
+                 // Check for silence
+                 if (normalizedVolume < silenceThreshold) {
+                     if (silenceStartTime === null) {
+                         silenceStartTime = Date.now();
+                     } else if (Date.now() - silenceStartTime > silenceDuration) {
+                         // Auto-stop on silence
+                         console.log('Auto-stopping due to silence');
+                         stopRecording();
+                         clearInterval(window.silenceDetectionInterval);
+                         window.silenceDetectionInterval = null;
+                     }
+                 } else {
+                     // Reset silence timer if sound detected
+                     silenceStartTime = null;
+                 }
+             }, 100); // Check every 100ms
+         }
+
+        // Process audio
+        async function processAudio(audioBlob) {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+
+                const response = await fetch('/api/process-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                                 if (result.error) {
+                     showMessage(result.error, 'error');
+                 } else {
+                     showMessage('Voice processed successfully!', 'success');
+                     loadConversations();
+                     
+                     // Play audio only if speech is enabled
+                     if (result.audio && document.getElementById('enableSpeech').checked) {
+                         playAudio(result.audio);
+                     } else if (result.audio && !document.getElementById('enableSpeech').checked) {
+                         console.log('Speech disabled - audio not played');
+                     }
+                 }
+            } catch (error) {
+                showMessage('Failed to process audio: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+                 // Play audio
+         function playAudio(base64Audio) {
+             const audio = new Audio('data:audio/wav;base64,' + base64Audio);
+             
+             // Show stop speech button when audio starts playing
+             const stopBtn = document.getElementById('stopSpeechBtn');
+             stopBtn.style.display = 'inline-block';
+             
+             // Store audio reference for stopping
+             window.currentPlayingAudio = audio;
+             
+             audio.play().catch(error => {
+                 console.error('Failed to play audio:', error);
+                 stopBtn.style.display = 'none';
+             });
+             
+             // Hide stop button when audio finishes
+             audio.onended = function() {
+                 stopBtn.style.display = 'none';
+                 window.currentPlayingAudio = null;
+             };
+         }
+         
+         // Stop AI speech
+         function stopAISpeech() {
+             if (window.currentPlayingAudio) {
+                 window.currentPlayingAudio.pause();
+                 window.currentPlayingAudio.currentTime = 0;
+                 window.currentPlayingAudio = null;
+                 
+                 // Hide stop button
+                 document.getElementById('stopSpeechBtn').style.display = 'none';
+                 
+                 showMessage('AI speech stopped!', 'info');
+             }
+         }
+
+        // Load conversations
+        async function loadConversations() {
+            try {
+                const response = await fetch('/api/conversations');
+                const conversations = await response.json();
+                
+                const conversationList = document.getElementById('conversationList');
+                
+                if (conversations.length === 0) {
+                    conversationList.innerHTML = `
+                        <p style="text-align: center; color: #718096; padding: 40px;">
+                            <i class="fas fa-comment-slash" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                            No conversations yet. Start by recording your voice!
+                        </p>
+                    `;
+                    return;
+                }
+
+                conversationList.innerHTML = conversations.map(conv => `
+                    <div class="conversation-item">
+                        <div class="conversation-header">
+                            <span class="conversation-time">${conv.timestamp}</span>
+                            <span>#${conv.id}</span>
+                        </div>
+                        <div class="conversation-content">
+                            <div class="user-input">
+                                <h4><i class="fas fa-user"></i> You Said</h4>
+                                <p>${conv.user_input}</p>
+                            </div>
+                            <div class="ai-response">
+                                <h4><i class="fas fa-robot"></i> AI Response</h4>
+                                <p>${conv.ai_response}</p>
+                                                                 ${conv.audio_available ? 
+                                     `<button class="play-audio-btn" onclick="playConversationAudio(${conv.id})">
+                                         <i class="fas fa-play"></i> Play Audio
+                                     </button>` : 
+                                     '<span style="color: #718096; font-size: 0.9rem;">No audio available</span>'
+                                 }
+                                 ${!document.getElementById('enableSpeech').checked ? 
+                                     '<br><small style="color: #f39c12;">🔇 Speech disabled</small>' : ''
+                                 }
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load conversations:', error);
+            }
+        }
+
+        // Play conversation audio
+        function playConversationAudio(conversationId) {
+            showMessage('Audio playback feature coming soon!', 'info');
+        }
+
+        // Request microphone permission
+        async function requestMicrophonePermission() {
+            try {
+                // Check browser compatibility first
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showMessage('Your browser does not support microphone access. Please use Chrome, Firefox, or Edge.', 'error');
+                    return;
+                }
+
+                const permissionBtn = document.getElementById('permissionBtn');
+                const microphoneStatus = document.getElementById('microphoneStatus');
+                const recordBtn = document.getElementById('recordBtn');
+                
+                permissionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Requesting Permission...';
+                permissionBtn.disabled = true;
+                microphoneStatus.innerHTML = '<span style="color: #f39c12;">⏳ Requesting microphone access...</span>';
+                
+                // Request microphone access
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 16000
+                    } 
+                });
+                
+                // If successful, enable recording
+                recordBtn.disabled = false;
+                permissionBtn.style.display = 'none';
+                microphoneStatus.innerHTML = '<span style="color: #48bb78;">✅ Microphone access granted!</span>';
+                
+                // Stop the stream since we just needed permission
+                stream.getTracks().forEach(track => track.stop());
+                
+                showMessage('Microphone permission granted! You can now record audio.', 'success');
+                
+            } catch (error) {
+                console.error('Permission request failed:', error);
+                const permissionBtn = document.getElementById('permissionBtn');
+                const microphoneStatus = document.getElementById('microphoneStatus');
+                
+                permissionBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Grant Microphone Permission';
+                permissionBtn.disabled = false;
+                
+                let errorMessage = 'Permission denied: ';
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Please allow microphone access in your browser settings and refresh the page.';
+                    microphoneStatus.innerHTML = '<span style="color: #f56565;">❌ Microphone access denied</span>';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No microphone found. Please connect a microphone and try again.';
+                    microphoneStatus.innerHTML = '<span style="color: #f56565;">❌ No microphone found</span>';
+                } else {
+                    errorMessage += error.message;
+                    microphoneStatus.innerHTML = '<span style="color: #f56565;">❌ Error: ' + error.message + '</span>';
+                }
+                
+                showMessage(errorMessage, 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add getUserMedia polyfill for older browsers
+            if (navigator.mediaDevices === undefined) {
+                navigator.mediaDevices = {};
+            }
+
+            if (navigator.mediaDevices.getUserMedia === undefined) {
+                navigator.mediaDevices.getUserMedia = function(constraints) {
+                    const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+                    if (!getUserMedia) {
+                        return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                    }
+
+                    return new Promise(function(resolve, reject) {
+                        getUserMedia.call(navigator, constraints, resolve, reject);
+                    });
+                }
+            }
+
+            // Check microphone permission on load
+            checkMicrophonePermissionOnLoad();
+        });
+
+        // Check microphone permission status on page load
+        async function checkMicrophonePermissionOnLoad() {
+            try {
+                // First check browser compatibility
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    document.getElementById('recordBtn').disabled = true;
+                    document.getElementById('permissionBtn').style.display = 'none';
+                    document.getElementById('microphoneStatus').innerHTML = '<span style="color: #f56565;">❌ Browser not supported - Please use Chrome, Firefox, or Edge</span>';
+                    return;
+                }
+
+                // Check if we have permission
+                if (navigator.permissions && navigator.permissions.query) {
+                    try {
+                        const result = await navigator.permissions.query({ name: 'microphone' });
+                        
+                        if (result.state === 'granted') {
+                            document.getElementById('recordBtn').disabled = false;
+                            document.getElementById('permissionBtn').style.display = 'none';
+                            document.getElementById('microphoneStatus').innerHTML = '<span style="color: #48bb78;">✅ Microphone access granted!</span>';
+                            return;
+                        }
+                    } catch (permError) {
+                        console.log('Permission query not supported, will request on demand');
+                    }
+                }
+                
+                // If no permission or can't check, show permission button
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('permissionBtn').style.display = 'block';
+                document.getElementById('microphoneStatus').innerHTML = '<span style="color: #f39c12;">⚠️ Microphone permission not set</span>';
+                
+            } catch (error) {
+                console.error('Permission check failed:', error);
+                // Fallback: show permission button
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('permissionBtn').style.display = 'block';
+                document.getElementById('microphoneStatus').innerHTML = '<span style="color: #f39c12;">⚠️ Microphone permission not set</span>';
+            }
+        }
+    </script>
+</body>
+</html>
